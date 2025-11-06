@@ -53,27 +53,6 @@ void function CreateGamemodeMCP()
 void function ShGamemodeMCP_Init()
 {
     GamemodeCPShared_Init()
-
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_INTRO, "music_mp_hardpoint_intro_flyin", TEAM_IMC )
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_INTRO, "music_mp_hardpoint_intro_flyin", TEAM_MILITIA )
-
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_WIN, "music_mp_hardpoint_epilogue_win", TEAM_IMC )
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_WIN, "music_mp_hardpoint_epilogue_win", TEAM_MILITIA )
-
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_DRAW, "music_mp_hardpoint_epilogue_lose", TEAM_IMC )
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_DRAW, "music_mp_hardpoint_epilogue_lose", TEAM_MILITIA )
-
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_LOSS, "music_mp_hardpoint_epilogue_lose", TEAM_IMC )
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_LOSS, "music_mp_hardpoint_epilogue_lose", TEAM_MILITIA )
-
-	RegisterLevelMusicForTeam( eMusicPieceID.GAMEMODE_1, "music_mp_hardpoint_almostdone", TEAM_IMC )
-	RegisterLevelMusicForTeam( eMusicPieceID.GAMEMODE_1, "music_mp_hardpoint_almostdone", TEAM_MILITIA )
-
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_LAST_MINUTE, "music_mp_hardpoint_lastminute", TEAM_IMC )
-	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_LAST_MINUTE, "music_mp_hardpoint_lastminute", TEAM_MILITIA )
-    #if CLIENT
-	CLCapturePoint_RegisterNetworkFunctions()
-    #endif
 }
 
 void function MCPRegisterNetworkVars()
@@ -104,4 +83,7 @@ void function MCPRegisterNetworkVars()
 	RegisterNetworkedVariable( "milChevronState", SNDC_GLOBAL, SNVT_INT )
 
 	Remote_RegisterFunction( "ServerCallback_CP_PlayMatchEndingMusic" )
+    #if CLIENT
+	CLCapturePoint_RegisterNetworkFunctions()
+    #endif
 }
