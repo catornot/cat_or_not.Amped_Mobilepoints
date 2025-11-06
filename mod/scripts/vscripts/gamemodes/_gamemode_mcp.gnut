@@ -5,8 +5,6 @@ global function RateSpawnpoints_MCP
 
 void function GamemodeMCP_Init()
 {
-    GamemodeCPShared_Init()
-
     Riff_ForceTitanAvailability( eTitanAvailability.Never )
 
 	Hardpoints_Init()
