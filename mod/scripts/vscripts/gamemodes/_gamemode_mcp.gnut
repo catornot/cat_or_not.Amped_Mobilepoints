@@ -157,9 +157,6 @@ void function HandleCapturepointMovement()
 	{
         wait 30
 
-        bool prevAmpingState = CPstate.ampingEnabled
-        CPstate.ampingEnabled = false
-
         CPstate.hardpoints.randomize()
         vector destination = CPstate.hardpoints[ CPstate.hardpoints.len() - 1 ].prop.GetOrigin()
         vector angles = CPstate.hardpoints[ CPstate.hardpoints.len() - 1 ].prop.GetAngles()
@@ -181,18 +178,14 @@ void function HandleCapturepointMovement()
             trigger = hardpoint.trigger
         }
         
-        while ( hardpointsReady >= 3 )
+        while ( hardpointsReady < 3 )
             WaitFrame()
         
         foreach( entity player in GetPlayerArray() )
             Remote_CallFunction_Replay( player, "ServerCallback_MobileCapturepoints_Moving" )
 
-        wait 30
-
-        while ( hardpointsReady != 0 )
+        while ( hardpointsReady > 0 )
             WaitFrame()
-
-        CPstate.ampingEnabled = prevAmpingState
 
         foreach( entity player in GetPlayerArray() )
             Remote_CallFunction_Replay( player, "ServerCallback_MobileCapturepoints_Settled" )
@@ -218,12 +211,14 @@ void function HandleSingleHardpointMovementFollow( HardpointState hp, NewHardpoi
     entity mover = CreateScriptMover( hp.prop.GetOrigin(), hp.prop.GetAngles() )
     hp.prop.SetParent( mover )
     
-    float timePerLine = max( 30.0 / path.len(), 0.1 )
+    float totalTime = Distance2D( hp.prop.GetOrigin(), newHp.origin ) / 50.
+    float timePerLine = totalTime / path.len()
 
     foreach( vector point in path )
     {
-        mover.NonPhysicsMoveTo( point, timePerLine, 0.0, 0.0 )
-        wait timePerLine
+        mover.NonPhysicsMoveTo( point, 0.000001, 0.0, 0.0 )
+        // wait timePerLine
+        WaitFrame()
     }
 
     mover.NonPhysicsMoveTo( newHp.origin, timePerLine * 2, 0.0, 0.0 )
