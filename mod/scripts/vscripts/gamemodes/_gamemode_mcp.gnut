@@ -196,15 +196,19 @@ void function HandleSingleHardpointMovement( HardpointState hp, NewHardpointStat
 {
     WaitFrame()
 
+    // doing this is does really weird stuff
 	array<vector> path = OcttreeFindPath( hp.prop.GetOrigin() + <0,0,50>, newHp.origin + <0,0,50> )
-
-    hardpointsReady += 1
 
     thread HandleSingleHardpointMovementFollow( hp, newHp, path )
 }
 
 void function HandleSingleHardpointMovementFollow( HardpointState hp, NewHardpointState newHp, array<vector> path )
 {
+    while ( hardpointsReady < 3 )
+        WaitFrame()
+
+    hardpointsReady += 1
+
     // angle it correctly
     hp.prop.SetAngles( <0, hp.prop.GetAngles().y, 0> )
     
@@ -239,11 +243,15 @@ void function HandleSingleHardpointMovementFollow( HardpointState hp, NewHardpoi
     hp.trigger = newHp.trigger
     hp.trigger.SetOwner( hp.ent )
     hp.trigger.Enable()
-    hp.trigger.SearchForNewTouchingEntity()
 
     hp.ent.Signal( "StoppedHardpointMovement" )
 
     hardpointsReady -= 1
+
+    // wait a bit for the other trigger to be done
+    wait 0.5
+    
+    hp.trigger.SearchForNewTouchingEntity()
 }
 
 void function HandleHardpointRuiMovement( HardpointState hp )
