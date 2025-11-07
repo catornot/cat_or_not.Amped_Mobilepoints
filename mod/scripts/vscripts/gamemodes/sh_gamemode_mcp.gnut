@@ -64,7 +64,8 @@ void function MCPRegisterNetworkVars()
 
     Remote_RegisterFunction( "ServerCallback_MobileCapturepoints_Moving" )
     Remote_RegisterFunction( "ServerCallback_MobileCapturepoints_Settled" )
-    Remote_RegisterFunction( "ServerCallback_MobileCapturepoint_Moved" )
+    Remote_RegisterFunction( "ServerCallback_MobileCapturepointMoveUI" )
+    Remote_RegisterFunction( "ServerCallback_MobileCapturepointStopUIMove" )
 
 	printt( "registering gamemode network variables for MOBILE_CAPTURE_POINT" )
 	RegisterNetworkedVariable( "objectiveAEnt", SNDC_GLOBAL, SNVT_ENTITY )

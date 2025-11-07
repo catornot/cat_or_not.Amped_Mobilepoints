@@ -250,13 +250,24 @@ void function HandleHardpointRuiMovement( HardpointState hp )
 {
     hp.ent.EndSignal( "StoppedHardpointMovement" )
 
+    foreach( entity player in GetPlayerArray() )
+        Remote_CallFunction_NonReplay( player, "ServerCallback_MobileCapturepointMoveUI", hp.ent.GetEncodedEHandle() )
+
+	OnThreadEnd(
+		function() : ( hp )
+		{
+            foreach( entity player in GetPlayerArray() )
+                Remote_CallFunction_NonReplay( player, "ServerCallback_MobileCapturepointStopUIMove", hp.ent.GetEncodedEHandle() )
+        }
+	)
+
     for(;;)
     {
         hp.ent.SetOrigin( hp.prop.GetOrigin() )
-        foreach( entity player in GetPlayerArray() )
-            Remote_CallFunction_NonReplay( player, "ServerCallback_MobileCapturepoint_Moved", hp.ent.GetEncodedEHandle() )
         WaitFrame()
     }
+
+    
 }
 
 void function HandleHardpointTrigger( HardpointState hp, entity trigger )

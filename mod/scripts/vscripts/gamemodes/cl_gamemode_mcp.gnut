@@ -3,7 +3,8 @@ untyped
 global function ClGamemodeMCP_Init
 global function ServerCallback_MobileCapturepoints_Moving
 global function ServerCallback_MobileCapturepoints_Settled
-global function ServerCallback_MobileCapturepoint_Moved
+global function ServerCallback_MobileCapturepointMoveUI
+global function ServerCallback_MobileCapturepointStopUIMove
 
 void function ClGamemodeMCP_Init()
 {
@@ -26,6 +27,8 @@ void function ClGamemodeMCP_Init()
 	RegisterLevelMusicForTeam( eMusicPieceID.LEVEL_LAST_MINUTE, "music_mp_hardpoint_lastminute", TEAM_MILITIA )
 
 	AddCreateCallback( "info_hardpoint", OnHardpointCreated )
+
+    RegisterSignal( "StopUIMove" )
 }
 
 
@@ -53,29 +56,27 @@ void function OnHardpointCreated( entity hardpoint )
     
 }
 
-void function ServerCallback_MobileCapturepoint_Moved( int capturePointHandle )
+void function ServerCallback_MobileCapturepointMoveUI( int capturePointHandle )
+{
+    thread MobileCapturepointMoveUIThreaded( capturePointHandle )
+}
+
+void function MobileCapturepointMoveUIThreaded( int capturePointHandle )
 {
 	entity capturePoint = GetEntityFromEncodedEHandle( capturePointHandle )
 
-    // capturePoint.s.initialized <- true
-    
-    // HardpointChanged( capturePoint )
+    capturePoint.EndSignal( "StopUIMove" )
+    capturePoint.EndSignal( "OnDestroy" )
 
-    if ( "worldIcon" in capturePoint.s )
+    for(;;)
     {
-    	capturePoint.s.worldIcon.SetPosition( capturePoint.GetOrigin() )
+    	RuiSetFloat3(  GetHardpointWorlRui( capturePoint.GetHardpointID() ), "pos", capturePoint.GetOrigin() + < 0, 0, 64 > )
+        WaitFrame()
     }
+}
 
-    if ( "progressBar" in capturePoint.s )
-    	capturePoint.s.progressBar.SetOrigin( capturePoint.GetOrigin() )
-
-    if ( "statusText" in capturePoint.s )
-    	capturePoint.s.statusText.SetOrigin( capturePoint.GetOrigin() )
-
-    if ( "labelText" in capturePoint.s )
-    	capturePoint.s.labelText.SetOrigin( capturePoint.GetOrigin() )
-
-    // HardpointEntityChanged( GetLocalViewPlayer() )
-
-	RuiSetFloat3(  GetHardpointWorlRui( capturePoint.GetHardpointID() ), "pos", capturePoint.GetOrigin() + < 0, 0, 64 > )
+void function ServerCallback_MobileCapturepointStopUIMove( int capturePointHandle )
+{
+	entity capturePoint = GetEntityFromEncodedEHandle( capturePointHandle )
+    capturePoint.Signal( "StopUIMove" )
 }
