@@ -198,13 +198,6 @@ void function HandleSingleHardpointMovement( HardpointState hp, NewHardpointStat
 
     // doing this is does really weird stuff
 	array<vector> path = OcttreeFindPath( hp.prop.GetOrigin() + <0,0,50>, newHp.origin + <0,0,50> )
-    // var navmesh = NavigationCreate( NavigationFindPath )
-    // NavigationFindPath( navmesh, hp.prop.GetOrigin() + <0,0,50>, newHp.origin + <0,0,50> )
-    // var pathVar = NavigationGetAllPoints( navmesh )
-		
-    // array<vector> path = []
-    // foreach ( var point in expect array( pathVar ) )
-    //     path.insert( 0, expect vector( point ) )
 
     thread HandleSingleHardpointMovementFollow( hp, newHp, path )
 }
@@ -271,8 +264,12 @@ void function HandleHardpointRuiMovement( HardpointState hp )
 	OnThreadEnd(
 		function() : ( hp )
 		{
+            // hmm maybe should go back to the other version
             foreach( entity player in GetPlayerArray() )
                 Remote_CallFunction_NonReplay( player, "ServerCallback_MobileCapturepointStopUIMove", hp.ent.GetEncodedEHandle() )
+
+            foreach( entity player in GetPlayerArray() )
+                Remote_CallFunction_NonReplay( player, "ServerCallback_MobileCapturepointMoveUI", hp.ent.GetEncodedEHandle() )
         }
 	)
 
@@ -281,8 +278,6 @@ void function HandleHardpointRuiMovement( HardpointState hp )
         hp.ent.SetOrigin( hp.prop.GetOrigin() )
         WaitFrame()
     }
-
-    
 }
 
 void function HandleHardpointTrigger( HardpointState hp, entity trigger )
