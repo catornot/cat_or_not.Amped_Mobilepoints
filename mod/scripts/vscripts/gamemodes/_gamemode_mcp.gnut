@@ -163,6 +163,9 @@ void function HandleCapturepointMovement()
 	{
         wait 30
 
+		if ( GetGameState() > eGameState.Playing )
+			break
+
         CPstate.hardpoints.randomize()
         vector destination = CPstate.hardpoints[ CPstate.hardpoints.len() - 1 ].prop.GetOrigin()
         vector angles = CPstate.hardpoints[ CPstate.hardpoints.len() - 1 ].prop.GetAngles()
@@ -220,6 +223,16 @@ void function HandleSingleHardpointMovementFollow( HardpointState hp, NewHardpoi
     while ( hardpointsReady < 3 )
         WaitFrame()
 
+    thread EmitHardpointHoverSound( hp )
+
+	array<entity> activeFX
+	entity dirFX
+
+	activeFX.append( StartParticleEffectOnEntityWithPos_ReturnEntity( hp.prop, GetParticleSystemIndex( $"P_team_jet_hover_HLD" ), FX_PATTACH_CUSTOMORIGIN_FOLLOW, hp.prop.LookupAttachment( "REF" ), < -10, -10, -2>, <90,90,90> ) )
+	activeFX.append( StartParticleEffectOnEntityWithPos_ReturnEntity( hp.prop, GetParticleSystemIndex( $"P_team_jet_hover_HLD" ), FX_PATTACH_CUSTOMORIGIN_FOLLOW, hp.prop.LookupAttachment( "REF" ), < 10, 10, -2>, <90,90,90> ) )
+	activeFX.append( StartParticleEffectOnEntityWithPos_ReturnEntity( hp.prop, GetParticleSystemIndex( $"P_team_jet_hover_HLD" ), FX_PATTACH_CUSTOMORIGIN_FOLLOW, hp.prop.LookupAttachment( "REF" ), < 10, -10, -2>, <90,90,90> ) )
+	activeFX.append( StartParticleEffectOnEntityWithPos_ReturnEntity( hp.prop, GetParticleSystemIndex( $"P_team_jet_hover_HLD" ), FX_PATTACH_CUSTOMORIGIN_FOLLOW, hp.prop.LookupAttachment( "REF" ), < -10, 10, -2>, <90,90,90> ) )
+
     // angle it correctly
     hp.prop.SetAngles( <0, hp.prop.GetAngles().y, 0> )
     
@@ -231,10 +244,16 @@ void function HandleSingleHardpointMovementFollow( HardpointState hp, NewHardpoi
 
     foreach( vector point in path )
     {
+		float angle = RadToDeg( DotProduct( hp.prop.GetOrigin(), point ) )
+		dirFX = StartParticleEffectOnEntityWithPos_ReturnEntity( hp.prop, GetParticleSystemIndex( $"P_team_jet_hover_HLD" ), FX_PATTACH_CUSTOMORIGIN_FOLLOW, hp.prop.LookupAttachment( "REF" ), < 0, 0, 20>, <0,angle,0> )
+
 		point = FitHardpoint( hp.prop, point )
         mover.NonPhysicsMoveTo( point, timePerLine, 0.0, 0.0 )
         // wait timePerLine
         WaitFrame()
+
+		if ( IsValid( dirFX ) )
+			dirFX.Destroy()
     }
 
     mover.NonPhysicsMoveTo( newHp.origin, timePerLine * 2, 0.0, 0.0 )
@@ -261,6 +280,14 @@ void function HandleSingleHardpointMovementFollow( HardpointState hp, NewHardpoi
     hardpointsReady -= 1
 
     hp.trigger.SearchForNewTouchingEntity()
+
+	if ( IsValid( dirFX ) )
+		dirFX.Destroy()
+	foreach ( fx in activeFX )
+	{
+		if ( IsValid( fx ) )
+			fx.Destroy()
+	}
 }
 
 vector function FitHardpoint( entity prop, vector point )
@@ -338,6 +365,24 @@ void function HandleHardpointTrigger( HardpointState hp, entity trigger )
 	)
 
     hp.ent.WaitSignal( "StoppedHardpointMovement" )
+}
+
+void function EmitHardpointHoverSound( HardpointState hp )
+{
+    hp.ent.EndSignal( "StoppedHardpointMovement" )
+
+	OnThreadEnd(
+		function() : ( hp )
+		{
+			StopSoundOnEntity( hp.prop, "titan_core_flight_hover_3p" )
+        }
+	)
+
+	for(;;)
+	{
+		EmitSoundOnEntity( hp.prop, "titan_core_flight_hover_3p" ) // boost_hover_body_3p_enemy 
+		wait 3.5 // GetSoundDuration( "titan_core_flight_hover_3p_enemy" ) // 3.94069
+	}
 }
 
 bool function MobileHardpointRemove( entity ent )
