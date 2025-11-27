@@ -1,7 +1,7 @@
 {
     "Name": "cat_or_not.AmpedMobilepoint",
     "Description": "Amped Hardpoint but the capture points move around",
-    "Version": "0.0.5",
+    "Version": "0.0.6",
     "DownloadLink": "https://northstar.thunderstore.io/package/download/Example/Mod/",
 
     "LoadPriority": 3,
